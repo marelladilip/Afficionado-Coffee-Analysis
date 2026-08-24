@@ -259,5 +259,5 @@ with st.expander("📊 View Raw Sales Data"):
 # FOOTER
 # --------------------------------------------------
 st.caption(
-    "Afficionado Coffee Analysis | Data Analytics Project"
+    "Afficionado Coffee Analysis | Data Analytics Project|By Dilip Marella"
 )
