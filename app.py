@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import plotly.express as px
 
 # --------------------------------------------------
 # PAGE CONFIG
@@ -18,12 +19,14 @@ def load_data():
     df = pd.read_csv("outputs/processed_coffee_data.csv")
     return df
 
+
 df = load_data()
 
 # --------------------------------------------------
 # TITLE
 # --------------------------------------------------
 st.title("☕ Afficionado Coffee Analytics")
+
 st.markdown(
     "### Sales Trends, Store Performance & Time-Based Demand Analysis"
 )
@@ -35,8 +38,13 @@ st.divider()
 # --------------------------------------------------
 st.sidebar.header("🔎 Dashboard Filters")
 
-stores = ["All"] + sorted(df["store_location"].dropna().unique().tolist())
-categories = ["All"] + sorted(df["product_category"].dropna().unique().tolist())
+stores = ["All"] + sorted(
+    df["store_location"].dropna().unique().tolist()
+)
+
+categories = ["All"] + sorted(
+    df["product_category"].dropna().unique().tolist()
+)
 
 selected_store = st.sidebar.selectbox(
     "Store Location",
@@ -48,6 +56,9 @@ selected_category = st.sidebar.selectbox(
     categories
 )
 
+# --------------------------------------------------
+# FILTER DATA
+# --------------------------------------------------
 filtered_df = df.copy()
 
 if selected_store != "All":
@@ -64,7 +75,9 @@ if selected_category != "All":
 # KPI CALCULATIONS
 # --------------------------------------------------
 total_revenue = filtered_df["revenue"].sum()
+
 total_transactions = filtered_df["transaction_id"].nunique()
+
 total_units = filtered_df["transaction_qty"].sum()
 
 avg_transaction = (
@@ -118,13 +131,73 @@ store_performance = (
 
 col1, col2 = st.columns(2)
 
+# --------------------------------------------------
+# REVENUE BY STORE
+# --------------------------------------------------
 with col1:
-    st.markdown("**Revenue by Store**")
-    st.bar_chart(store_performance["Revenue"])
 
+    st.markdown("**Revenue by Store**")
+
+    store_revenue_df = store_performance.reset_index()
+
+    fig = px.bar(
+        store_revenue_df,
+        x="store_location",
+        y="Revenue",
+        color="Revenue",
+        color_continuous_scale=[
+            [0.0, "blue"],
+            [0.5, "purple"],
+            [1.0, "red"]
+        ]
+    )
+
+    fig.update_layout(
+        showlegend=False,
+        coloraxis_showscale=False,
+        xaxis_title="Store",
+        yaxis_title="Revenue",
+        margin=dict(l=20, r=20, t=30, b=20)
+    )
+
+    st.plotly_chart(
+        fig,
+        use_container_width=True
+    )
+
+# --------------------------------------------------
+# UNITS SOLD BY STORE
+# --------------------------------------------------
 with col2:
+
     st.markdown("**Units Sold by Store**")
-    st.bar_chart(store_performance["Units"])
+
+    store_units_df = store_performance.reset_index()
+
+    fig = px.bar(
+        store_units_df,
+        x="store_location",
+        y="Units",
+        color="Units",
+        color_continuous_scale=[
+            [0.0, "blue"],
+            [0.5, "purple"],
+            [1.0, "red"]
+        ]
+    )
+
+    fig.update_layout(
+        showlegend=False,
+        coloraxis_showscale=False,
+        xaxis_title="Store",
+        yaxis_title="Units Sold",
+        margin=dict(l=20, r=20, t=30, b=20)
+    )
+
+    st.plotly_chart(
+        fig,
+        use_container_width=True
+    )
 
 st.divider()
 
@@ -144,13 +217,73 @@ category_performance = (
 
 col1, col2 = st.columns(2)
 
+# --------------------------------------------------
+# REVENUE BY CATEGORY
+# --------------------------------------------------
 with col1:
-    st.markdown("**Revenue by Category**")
-    st.bar_chart(category_performance["Revenue"])
 
+    st.markdown("**Revenue by Category**")
+
+    category_revenue_df = category_performance.reset_index()
+
+    fig = px.bar(
+        category_revenue_df,
+        x="product_category",
+        y="Revenue",
+        color="Revenue",
+        color_continuous_scale=[
+            [0.0, "blue"],
+            [0.5, "purple"],
+            [1.0, "red"]
+        ]
+    )
+
+    fig.update_layout(
+        showlegend=False,
+        coloraxis_showscale=False,
+        xaxis_title="Product Category",
+        yaxis_title="Revenue",
+        margin=dict(l=20, r=20, t=30, b=20)
+    )
+
+    st.plotly_chart(
+        fig,
+        use_container_width=True
+    )
+
+# --------------------------------------------------
+# UNITS SOLD BY CATEGORY
+# --------------------------------------------------
 with col2:
+
     st.markdown("**Units Sold by Category**")
-    st.bar_chart(category_performance["Units"])
+
+    category_units_df = category_performance.reset_index()
+
+    fig = px.bar(
+        category_units_df,
+        x="product_category",
+        y="Units",
+        color="Units",
+        color_continuous_scale=[
+            [0.0, "blue"],
+            [0.5, "purple"],
+            [1.0, "red"]
+        ]
+    )
+
+    fig.update_layout(
+        showlegend=False,
+        coloraxis_showscale=False,
+        xaxis_title="Product Category",
+        yaxis_title="Units Sold",
+        margin=dict(l=20, r=20, t=30, b=20)
+    )
+
+    st.plotly_chart(
+        fig,
+        use_container_width=True
+    )
 
 st.divider()
 
@@ -170,13 +303,79 @@ hourly_sales = (
 
 col1, col2 = st.columns(2)
 
+# --------------------------------------------------
+# REVENUE BY HOUR
+# --------------------------------------------------
 with col1:
-    st.markdown("**Revenue by Hour**")
-    st.line_chart(hourly_sales["Revenue"])
 
+    st.markdown("**Revenue by Hour**")
+
+    hourly_revenue_df = hourly_sales.reset_index()
+
+    fig = px.line(
+        hourly_revenue_df,
+        x="hour",
+        y="Revenue",
+        markers=True
+    )
+
+    fig.update_traces(
+        line=dict(
+            color="red",
+            width=3
+        ),
+        marker=dict(
+            size=7
+        )
+    )
+
+    fig.update_layout(
+        xaxis_title="Hour",
+        yaxis_title="Revenue",
+        margin=dict(l=20, r=20, t=30, b=20)
+    )
+
+    st.plotly_chart(
+        fig,
+        use_container_width=True
+    )
+
+# --------------------------------------------------
+# TRANSACTIONS BY HOUR
+# --------------------------------------------------
 with col2:
+
     st.markdown("**Transactions by Hour**")
-    st.line_chart(hourly_sales["Transactions"])
+
+    hourly_transactions_df = hourly_sales.reset_index()
+
+    fig = px.line(
+        hourly_transactions_df,
+        x="hour",
+        y="Transactions",
+        markers=True
+    )
+
+    fig.update_traces(
+        line=dict(
+            color="blue",
+            width=3
+        ),
+        marker=dict(
+            size=7
+        )
+    )
+
+    fig.update_layout(
+        xaxis_title="Hour",
+        yaxis_title="Transactions",
+        margin=dict(l=20, r=20, t=30, b=20)
+    )
+
+    st.plotly_chart(
+        fig,
+        use_container_width=True
+    )
 
 st.divider()
 
@@ -191,7 +390,10 @@ top_products = (
         Revenue=("revenue", "sum"),
         Units=("transaction_qty", "sum")
     )
-    .sort_values("Revenue", ascending=False)
+    .sort_values(
+        "Revenue",
+        ascending=False
+    )
     .head(10)
 )
 
@@ -240,6 +442,12 @@ if not filtered_df.empty:
         • 💰 Total revenue for selected filters:
         **${total_revenue:,.2f}**
         """
+    )
+
+else:
+
+    st.warning(
+        "No data available for the selected filters."
     )
 
 st.divider()
